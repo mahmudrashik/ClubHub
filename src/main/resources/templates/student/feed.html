@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/common :: head('Your Feed')"></head>
+<body data-rows="3">
+<header th:replace="fragments/common :: nav"></header>
+
+<main class="container">
+    <h2 class="m-0">Your Feed</h2>
+
+    <p class="mt-1">
+        <a class="btn" th:href="@{/me/posts/new}">+ Create new post on my club</a>
+        <a class="btn ghost" th:href="@{/student/university/clubs}">Clubs in my university</a>
+    </p>
+
+    <div th:if="${posts.empty}" class="mt-2">
+        <p class="help">No posts yet. Follow clubs or join one to see posts here.</p>
+    </div>
+
+    <div class="v-stack mt-2" th:if="${!posts.empty}">
+        <!-- Facebook-like stacked post card -->
+        <article class="card feed-card" th:each="p : ${posts.content}">
+            <!-- Header: avatar + club name + time -->
+            <div class="feed-head">
+                <a class="avatar" th:href="@{'/clubs/' + ${p.clubId}}">
+                    <span th:text="${#strings.substring(#strings.trim(p.clubName),0,2)}">CL</span>
+                </a>
+                <div class="feed-head__meta">
+                    <a class="club" th:href="@{'/clubs/' + ${p.clubId}}" th:text="${p.clubName}">Club</a>
+                    <div class="muted" th:text="${#temporals.format(p.createdAt, 'yyyy-MM-dd HH:mm')}">time</div>
+                </div>
+            </div>
+
+            <!-- Content preview -->
+            <div class="feed-content">
+                <div class="preview clamp-3" th:text="${p.preview}">Post preview…</div>
+            </div>
+
+            <!-- Optional image (full width inside card) -->
+            <div th:if="${p.imageUrl != null}" class="media mt-1">
+                <img th:src="${p.imageUrl}" alt="" loading="lazy">
+            </div>
+
+            <!-- Stats + View -->
+            <div class="feed-actions">
+                <div class="muted">
+                    <strong th:text="${p.likeCount}">0</strong> likes
+                    <span class="dot">•</span>
+                    <strong th:text="${p.commentCount}">0</strong> comments
+                </div>
+                <a class="btn ghost" th:href="@{'/clubs/' + ${p.clubId} + '/posts/' + ${p.postId}}">View post</a>
+            </div>
+        </article>
+    </div>
+
+    <!-- Pagination -->
+    <div class="h-stack center mt-3" th:if="${posts.totalPages > 1}">
+        <a class="btn subtle" th:if="${!posts.first}" th:href="@{/student/feed(page=${page-1}, size=${size})}">Prev</a>
+        <span>Page <strong th:text="${posts.number + 1}"></strong> / <span th:text="${posts.totalPages}"></span></span>
+        <a class="btn subtle" th:if="${!posts.last}" th:href="@{/student/feed(page=${page+1}, size=${size})}">Next</a>
+    </div>
+</main>
+
+<!-- Page-scoped CSS -->
+<style>
+    .feed-card { padding: 14px 16px; }
+    .feed-head { display: grid; grid-template-columns: 48px 1fr; gap: 10px; align-items: center; }
+    .feed-head .avatar {
+      width: 48px; height: 48px; border-radius: 50%; display: grid; place-items: center;
+      text-decoration: none; color: #fff; font-weight: 800;
+      background: linear-gradient(135deg, #111827, #374151);
+    }
+    .feed-head__meta .club { color: var(--text); font-weight: 700; text-decoration: none; }
+    .feed-head__meta .club:hover { text-decoration: underline; }
+
+    .feed-content { margin-top: 6px; }
+    .feed-actions { margin-top: 10px; display: flex; align-items: center; justify-content: space-between; }
+    .dot { color: var(--muted); margin: 0 6px; }
+</style>
+</body>
+</html>
